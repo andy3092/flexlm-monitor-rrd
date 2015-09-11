@@ -3,7 +3,6 @@
 import re
 import subprocess
 import sys
-import ipdb
 
 lmutil = "/usr/local/bin/lmutil"
 
@@ -14,9 +13,8 @@ def parse_license_line(line):
     The second string for the computer name can cause all sorts of issues
     e.g computer names with leading spaces or any number of spaces half way through
     makes it difficult to parse The output of lmutil is not always regular as it 
-    depends on the vendor. The regular expression may need tweaking depending on the output
-    based on https://github.com/beaugunderson/flexlm-license-status
-
+    depends on the vendor. The regular expression may need tweaking depending on the 
+    output based on https://github.com/beaugunderson/flexlm-license-status
 
     returns a dictionary with the following keys
     user computer computer2 version start and connection
