@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, Response
 from flask.ext.script import Manager
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
@@ -8,9 +8,12 @@ from flask.ext.wtf import Form
 from wtforms import StringField, FileField, SubmitField, IntegerField
 from wtforms.validators import Required
 from flask.ext.sqlalchemy import SQLAlchemy
+#from flask.ext.migrate import Migrate, MigrateCommand
 from wtforms import ValidationError
 from werkzeug.exceptions import HTTPException, NotFound
 import flexlm_parser
+import json
+import rrdfetch
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -24,6 +27,8 @@ app.debug = True
 manager = Manager(app)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
+#migrate = Migrate(app, db)
+#manager.add_command('db', MigrateCommand)
 moment = Moment(app)
 
 class Server(db.Model):
@@ -33,7 +38,14 @@ class Server(db.Model):
     server = db.Column(db.String(64))
     port = db.Column(db.Integer)
     software = db.Column(db.String(50))
-    rrdfile = db.Column(db.String(255))
+    rrd_file = db.Column(db.String(255))
+    columns = db.relationship('Columns', backref='servers')
+
+class Columns(db.Model):
+    __tablename__ = 'columns'
+    id = db.Column(db.Integer, primary_key=True)
+    columns = db.Column(db.String(50))
+    server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
 
     def __repr__(self):
         return '<Server %r>' % self.vendor
@@ -61,8 +73,8 @@ def index():
     servers = Server.query.all()
     return render_template('index.html', servers=servers)
 
-@app.route('/servers/<vendor>/usage')
-def usage(vendor):
+@app.route('/servers/<vendor>/usage1')
+def usage1(vendor):
     return render_template('usage.html', vendor=vendor)
 
 
@@ -79,6 +91,17 @@ def users(vendor):
     
     return render_template('users.html', vendor=vendor)
 
+@app.route('/servers/<vendor>/usage')
+def usage(vendor):
+    settings = Server.query.filter_by(vendor=vendor).first()
+    if settings is None:
+        raise(NotFound)
+    # rrdtool bindings dows not like unicode convert to str
+    data = rrdfetch.package_data(str(settings.rrd_file),'7d',['used','co110'])
+    #return jsonify(data[0]) # should do it this way
+    return Response(json.dumps(data, sort_keys=True), 
+                    mimetype='application/json')
+
 @app.route('/servers/config', methods=['GET', 'POST'])
 def config():
     form = AddServerForm()
@@ -93,7 +116,7 @@ def config():
                         port=session.get('port'),
                         server=session.get('server'),
                         software=session.get('software_feature'),
-                       rrdfile=session.get('rrd_file'))
+                       rrd_file=session.get('rrd_file'))
         db.session.add(record)
         db.session.commit()
         return redirect(url_for('config'))
