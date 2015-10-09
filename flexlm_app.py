@@ -105,9 +105,10 @@ def config():
         #db.session.add(column_record)
         db.session.commit()
         if session.get('rrd_file') is not None:
-            return redirect(url_for('config', vendor=session.get('vendor')))
+            return redirect(url_for('edit',
+                                   vendor=session.get('vendor')))
         else:
-            return redirect(url_for('/'))
+            return redirect(url_for('index'))
     return render_template('config.html', form=form, 
                            vendor=session.get('vendor'))
 
@@ -174,6 +175,7 @@ def edit(vendor):
         record.software_feature = form.software_feature.data
         record.rrd_file = form.rrd_file.data
         db.session.commit()
+        return redirect(url_for('index'))
 
     return render_template('config.html', form=form, 
                         vendor=session.get('vendor'))
