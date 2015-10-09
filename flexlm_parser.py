@@ -8,12 +8,14 @@ lmutil = "/usr/local/bin/lmutil"
 
 def parse_license_line(line):
     """
-    Parses a single line from the license output put in a seprate function as it 
-    is easier to test. t
-    The second string for the computer name can cause all sorts of issues
-    e.g computer names with leading spaces or any number of spaces half way through
-    makes it difficult to parse The output of lmutil is not always regular as it 
-    depends on the vendor. The regular expression may need tweaking depending on the 
+    Parses a single line from the license output put in a seprate function as 
+    it is easier to test. 
+    Sometimes the second string for the computer name can cause all sorts of 
+    issues.
+    e.g computer names with leading spaces or any number of spaces half 
+    way through makes it difficult to parse The output of lmutil as it is not 
+    always regular as it depends on the vendor. 
+    The regular expression may need tweaking depending on the 
     output based on https://github.com/beaugunderson/flexlm-license-status
 
     returns a dictionary with the following keys
@@ -34,17 +36,17 @@ def parse_license_line(line):
     license_re = re.compile(pattern)
     return license_re.match(license).groupdict()
 
-def get_licenses(server, feature):
+def get_licenses(server, feature, sort_field='computer'):
     """
     Simple function that polls a flexlm server
     feeds it to the parse license
     from out put from lmutil.
-    usage: get_licenses("port@example.com", "feature"))
+    default sort_field computer
+    usage: get_licenses("port@example.com", "feature", sort_field='user')
     """
 
     licenses = []
     try:
-        pass
         output = subprocess.check_output([lmutil, "lmstat", "-c", server,
                                           "-f", feature])
     except subprocess.CalledProcessError:
@@ -53,7 +55,8 @@ def get_licenses(server, feature):
     for line in output.splitlines(True):
         if "start" in line:
             licenses.append(parse_license_line(line))
-    return licenses
+    sorted_licenses = sorted(licenses, key=lambda k:k[sort_field])
+    return sorted_licenses
 
 if __name__ == "__main__":
     # So you can run it from the commandline
