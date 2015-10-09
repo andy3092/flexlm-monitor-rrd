@@ -51,7 +51,7 @@ class Columns(db.Model):
     server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
 
     def __repr__(self):
-        return '<Columns %r>' % self.__tablename__
+        return '<Columns %r>' % self.columns
 
 class baseForm(Form):
     vendor = StringField('Vendor', validators=[Required()])
@@ -60,14 +60,14 @@ class baseForm(Form):
     software_feature = StringField('Software To Monitor')
     rrd_file = StringField('Full Path To RRD Usage Database')
     
-
     def validate_vendor(self, field):
         if Server.query.filter_by(vendor=field.data).first():
             raise ValidationError('Vendor name already used')
 
     def validate_rrd_file(self, field):
+        # Check if the data is empty ok then if not check if it exists
         if field.data == '':
-            pass
+            pass 
         elif os.path.isfile(field.data) is False:
             raise ValidationError('File does not exist')
             if field.data[-3:] != 'rrd':
@@ -95,8 +95,6 @@ def config():
         session['server'] = form.server.data
         session['software_feature'] = form.software_feature.data
         session['rrd_file'] = form.rrd_file.data
-        #session['columns'] = form.columns.data
-        print(session.get('rrd_file'))
         record = Server(vendor=session.get('vendor'), 
                         port=session.get('port'),
                         server=session.get('server'),
@@ -116,33 +114,67 @@ def config():
 @app.route('/servers/config/<vendor>', methods=['GET', 'POST'])
 def edit(vendor):
     settings = Server.query.filter_by(vendor=vendor).first()
-    header = rrdfetch.header(str(settings.rrd_file))
-    columns = [row.columns for row in settings.columns]
-    
     if settings is None:
         raise(NotFound)                        
-    class AddColumnsForm(baseForm):
-        pass
-    
+
     if settings.rrd_file != '':
+        has_rrd_file = True
+        header = rrdfetch.header(str(settings.rrd_file))
+        columns = [row.columns for row in settings.columns]
+    else:
+        has_rrd_file = False
+
+    class EditForm(baseForm):
+        # Override the validator for the basefrom
+        # Want to make sure that we can accept the data by 
+        # relaxing the fact that the vendor is unique.
+        def validate_vendor(self, field):
+            if field.data == '':
+                raise ValidationError('Required Field')
+
+    if has_rrd_file is True:
         # Dynamically create the fields based on column names
+        # And check if they are in the database
         for column_name in header:
             checkbox_name = column_name
             if column_name in columns:
-                setattr(AddColumnsForm, checkbox_name, 
+                setattr(EditForm, checkbox_name, 
                         BooleanField(label=column_name, default=True))
             else:
-                setattr(AddColumnsForm, checkbox_name, 
+                setattr(EditForm, checkbox_name, 
                         BooleanField(label=column_name))
     
-            setattr(AddColumnsForm, 'submit', SubmitField('Add Server'))
+    setattr(EditForm, 'submit', SubmitField('Add Server'))
 
-        form = AddColumnsForm(port=settings.port, vendor=settings.vendor, 
-                          server=settings.server, 
-                          software_feature=settings.software, 
-                          rrd_file=settings.rrd_file)
-    #form.co110.data = True
-    print(form.co110.data)
+    form = EditForm(port=settings.port, vendor=settings.vendor, 
+                    server=settings.server, 
+                    software_feature=settings.software, 
+                    rrd_file=settings.rrd_file)
+
+    if form.validate_on_submit():
+        record = Server.query.filter_by(vendor=vendor).first()
+        # Deal with form that has the column names.
+        if has_rrd_file is True:
+            for column_name in header:
+                column_record = Columns.query.filter_by(
+                    columns=column_name, 
+                    server_id=settings.id).first()
+                checkbox_state = getattr(form, column_name).data
+                # Test the checkbox
+                if checkbox_state is True and column_record is None:
+                    record.columns.append(Columns(columns=column_name))
+                    db.session.add(record)
+                elif checkbox_state is False and column_record is not None:
+                    db.session.delete(column_record)
+
+        # Deal with the rest of the data to be updated
+        record.vendor = form.vendor.data
+        record.port = form.port.data
+        record.server = form.server.data
+        record.software_feature = form.software_feature.data
+        record.rrd_file = form.rrd_file.data
+        db.session.commit()
+
     return render_template('config.html', form=form, 
                         vendor=session.get('vendor'))
 
@@ -157,6 +189,7 @@ def users(vendor):
         raise(NotFound)
     server = str(settings.port) +'@'+ settings.server
     users = flexlm_parser.get_licenses(server, settings.software)
+    print users
     return render_template('users.html', vendor=vendor, users=users, 
                            current_time=datetime.utcnow())
     
@@ -169,7 +202,7 @@ def usage(vendor):
     if settings is None:
         raise(NotFound)
     columns = [row.columns for row in settings.columns]
-    # rrdtool bindings dows not like unicode convert to str
+    # rrdtool bindings do not like unicode convert to str
     data = rrdfetch.package_data(str(settings.rrd_file),'7d',columns)
     #return jsonify(data[0]) # should do it this way
     return Response(json.dumps(data, sort_keys=True), 
