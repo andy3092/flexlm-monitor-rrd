@@ -213,6 +213,8 @@ def delete(vendor):
         raise(NotFound)
     else:
         Server.query.filter_by(vendor=settings.vendor).delete()
+        # Delete cColumns so they are not orphaned
+        Columns.query.filter_by(server_id=settings.id).delete()
         db.session.commit()
     return redirect(url_for('index'))
 
