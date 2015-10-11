@@ -192,10 +192,6 @@ def edit(vendor):
     return render_template('config.html', form=form, 
                         vendor=session.get('vendor'))
 
-@app.route('/servers/<vendor>/usage1')
-def usage1(vendor):
-    return render_template('usage.html', vendor=vendor)
-
 @app.route('/servers/users/<vendor>')
 def users(vendor):
     settings = Server.query.filter_by(vendor=vendor).first() 
@@ -209,6 +205,16 @@ def users(vendor):
     
     
     return render_template('users.html', vendor=vendor)
+
+@app.route('/servers/delete/<vendor>')
+def delete(vendor):
+    settings = Server.query.filter_by(vendor=vendor).first()
+    if settings is None:
+        raise(NotFound)
+    else:
+        Server.query.filter_by(vendor=settings.vendor).delete()
+        db.session.commit()
+    return redirect(url_for('index'))
 
 @app.route('/servers/usage/<vendor>')
 def usage(vendor):
