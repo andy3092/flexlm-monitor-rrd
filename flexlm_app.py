@@ -119,11 +119,11 @@ def edit(vendor):
         raise(NotFound)                        
 
     if settings.rrd_file != '':
-        has_rrd_file = True
+        initial_has_rrd_file = True
         header = rrdfetch.header(str(settings.rrd_file))
         columns = [row.columns for row in settings.columns]
     else:
-        has_rrd_file = False
+        initial_has_rrd_file = False
 
     class EditForm(baseForm):
         # Override the validator for the basefrom
@@ -133,7 +133,7 @@ def edit(vendor):
             if field.data == '':
                 raise ValidationError('Required Field')
 
-    if has_rrd_file is True:
+    if initial_has_rrd_file is True:
         # Dynamically create the fields based on column names
         # And check if they are in the database
         for column_name in header:
@@ -145,7 +145,7 @@ def edit(vendor):
                 setattr(EditForm, checkbox_name, 
                         BooleanField(label=column_name))
     
-    setattr(EditForm, 'submit', SubmitField('Add Server'))
+    setattr(EditForm, 'submit', SubmitField('Update'))
 
     form = EditForm(port=settings.port, vendor=settings.vendor, 
                     server=settings.server, 
@@ -155,7 +155,8 @@ def edit(vendor):
     if form.validate_on_submit():
         record = Server.query.filter_by(vendor=vendor).first()
         # Deal with form that has the column names.
-        if has_rrd_file is True:
+        if initial_has_rrd_file is True:
+            # Clear out the current options then add the new ones.
             for column_name in header:
                 column_record = Columns.query.filter_by(
                     columns=column_name, 
@@ -173,9 +174,20 @@ def edit(vendor):
         record.port = form.port.data
         record.server = form.server.data
         record.software_feature = form.software_feature.data
-        record.rrd_file = form.rrd_file.data
-        db.session.commit()
-        return redirect(url_for('index'))
+        
+        # Check to see if the rrd file has been changed 
+        # if so:
+        # Delete all of the column names in the columns table
+        # then return this page with the new headers if any
+        # headers 
+        if record.rrd_file != form.rrd_file.data:
+            Columns.query.filter_by(server_id=record.id).delete()
+            record.rrd_file = form.rrd_file.data
+            db.session.commit()
+            return redirect(url_for('edit', vendor=vendor))
+        else:
+            db.session.commit()
+            return redirect(url_for('index'))
 
     return render_template('config.html', form=form, 
                         vendor=session.get('vendor'))
@@ -204,7 +216,7 @@ def usage(vendor):
     if settings is None:
         raise(NotFound)
     columns = [row.columns for row in settings.columns]
-    # rrdtool bindings do not like unicode convert to str
+    # rrdtool bindings does not like unicode convert to str
     data = rrdfetch.package_data(str(settings.rrd_file),'7d',columns)
     #return jsonify(data[0]) # should do it this way
     return Response(json.dumps(data, sort_keys=True), 
