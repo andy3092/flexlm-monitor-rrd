@@ -6,14 +6,16 @@
 {% block page_content %}
 <div class="page-header">
     <h1>Flexlm License Servers</h1>
-    <table style="width:60%">
+    <table style="width:80%">
       <thead>
 	<tr>
-	  <th style="width: 20%%;">Vendor</th>
-	  <th style="width: 20%%;">Port</th>
-	  <th style="width: 20%%;">Server</th>
-	  <th style="width: 20%%;">Software</th>
-	  <th style="width: 20%%;">Current Users</th>
+	  <th style="width: 14%%;">Vendor</th>
+	  <th style="width: 14%%;">Port</th>
+	  <th style="width: 14%%;">Server</th>
+	  <th style="width: 14%%;">Software</th>
+	  <th style="width: 14%%;">Current Users</th>
+	  <th style="width: 14%%;"></th>
+	  <th style="width: 14%%;"></th>
 	</tr>
       </thead>
       <tbody>
@@ -25,6 +27,10 @@
 	<td> {{ server.software }} </td>
 	<td> <a href="{{ url_for('users', vendor=server.vendor) }}"> 
 	    Detailed list</a> </td>
+	<td> <a href="{{ url_for('edit', vendor=server.vendor) }}"> 
+	    Edit</a> </td>
+	<td> <a href="{{ url_for('delete', vendor=server.vendor) }}"> 
+	    Delete</a> </td>
 	{% endfor %}
 	</tr>
       </tbody>
