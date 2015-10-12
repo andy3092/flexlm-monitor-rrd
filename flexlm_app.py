@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from flask import Flask, render_template, session, redirect, url_for, Response
+from flask import abort
 from flask.ext.script import Manager
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
@@ -9,7 +10,6 @@ from wtforms import StringField, FileField, SubmitField, IntegerField
 from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
 from wtforms.validators import Required
 from flask.ext.sqlalchemy import SQLAlchemy
-from werkzeug.exceptions import HTTPException, NotFound
 import flexlm_parser
 import json
 import rrdfetch
@@ -116,7 +116,7 @@ def config():
 def edit(vendor):
     settings = Server.query.filter_by(vendor=vendor).first()
     if settings is None:
-        raise(NotFound)                        
+        abort(404)                        
 
     if settings.rrd_file != '':
         initial_has_rrd_file = True
@@ -196,7 +196,7 @@ def edit(vendor):
 def users(vendor):
     settings = Server.query.filter_by(vendor=vendor).first() 
     if settings is None:
-        raise(NotFound)
+        abort(404)
     server = str(settings.port) +'@'+ settings.server
     users = flexlm_parser.get_licenses(server, settings.software)
     print users
@@ -210,7 +210,7 @@ def users(vendor):
 def delete(vendor):
     settings = Server.query.filter_by(vendor=vendor).first()
     if settings is None:
-        raise(NotFound)
+        abort(404)
     else:
         Server.query.filter_by(vendor=settings.vendor).delete()
         # Delete cColumns so they are not orphaned
@@ -218,14 +218,18 @@ def delete(vendor):
         db.session.commit()
     return redirect(url_for('index'))
 
-@app.route('/servers/usage/<vendor>')
-def usage(vendor):
+@app.route('/servers/usage/<vendor>/<time_peroid>')
+def usage(vendor, time_peroid):
     settings = Server.query.filter_by(vendor=vendor).first()
     if settings is None:
-        raise(NotFound)
+        abort(404)
     columns = [row.columns for row in settings.columns]
     # rrdtool bindings does not like unicode convert to str
-    data = rrdfetch.package_data(str(settings.rrd_file),'7d',columns)
+    try:
+        data = rrdfetch.package_data(str(settings.rrd_file), str(time_peroid), 
+                                     columns)
+    except:
+        abort(500)
     #return jsonify(data[0]) # should do it this way
     return Response(json.dumps(data, sort_keys=True), 
                     mimetype='application/json')
