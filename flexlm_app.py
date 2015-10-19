@@ -13,7 +13,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 import flexlm_parser
 import json
 import rrdfetch
-from operator import eq
+#from operator import eq
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -27,8 +27,6 @@ app.debug = True
 manager = Manager(app)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
-#migrate = Migrate(app, db)
-#manager.add_command('db', MigrateCommand)
 moment = Moment(app)
 
 class Server(db.Model):
@@ -109,8 +107,7 @@ def config():
                                    vendor=session.get('vendor')))
         else:
             return redirect(url_for('index'))
-    return render_template('config.html', form=form, 
-                           vendor=session.get('vendor'))
+    return render_template('config.html', form=form)
 
 @app.route('/servers/config/<vendor>', methods=['GET', 'POST'])
 def edit(vendor):
@@ -190,7 +187,7 @@ def edit(vendor):
             return redirect(url_for('index'))
 
     return render_template('config.html', form=form, 
-                        vendor=session.get('vendor'))
+                           vendor=vendor)
 
 @app.route('/servers/users/<vendor>')
 def users(vendor):
@@ -218,7 +215,7 @@ def delete(vendor):
         db.session.commit()
     return redirect(url_for('index'))
 
-@app.route('/servers/usage/<vendor>/<time_peroid>')
+@app.route('/servers/usage/data/<vendor>/<time_peroid>')
 def usage(vendor, time_peroid):
     settings = Server.query.filter_by(vendor=vendor).first()
     if settings is None:
@@ -231,8 +228,19 @@ def usage(vendor, time_peroid):
     except:
         abort(500)
     #return jsonify(data[0]) # should do it this way
-    return Response(json.dumps(data, sort_keys=True), 
+    return Response(json.dumps(data, sort_keys=True),
                     mimetype='application/json')
+
+@app.route('/servers/usage/<vendor>')
+@app.route('/servers/usage/<vendor>/')
+@app.route('/servers/usage/<vendor>/<time_peroid>')
+def chart(vendor, time_peroid='24h'):
+    settings = Server.query.filter_by(vendor=vendor).first()
+    if settings is None:
+        abort(404)
+    return render_template('usage.html', vendor=vendor, 
+                           current_time=datetime.utcnow(), 
+                           time_peroid=time_peroid)
 
 @app.errorhandler(404)
 def page_not_found(e):

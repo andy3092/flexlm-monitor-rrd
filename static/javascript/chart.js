@@ -1,15 +1,7 @@
-getChart('1m');
-
-function getChart(timePeroid) {
-    $.get(window.location.href + '/' + timePeroid, function (data) {
-	addChart(data);
-    });
-}
-
-function addChart(data) {
+function addChart(data, svgid) {
     var colors = d3.scale.category20();
-
     var chart;
+
     nv.addGraph(function() {
         chart = nv.models.stackedAreaChart()
             .useInteractiveGuideline(true)
@@ -23,13 +15,13 @@ function addChart(data) {
 
         chart.legend.vers('furious');
 
-        d3.select('#chart1')
+        d3.select(svgid)
             .datum(data)
             .transition().duration(1000)
             .call(chart)
             .each('start', function() {
                 setTimeout(function() {
-                    d3.selectAll('#chart1 *').each(function() {
+                    d3.selectAll(svgid + ' *').each(function() {
                         if(this.__transition__)
                             this.__transition__.duration = 1;
                     })

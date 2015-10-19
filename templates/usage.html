@@ -9,14 +9,23 @@
 {% block scripts %}
   {{super()}}
 
-<!--Set the script root for scripts-->
-    <script type=text/javascript>
-      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+<!-- Add a chart to the current page -->
+<script type=text/javascript>
+  var dataUrl = '{{ url_for('usage', vendor=vendor, time_peroid=time_peroid) }}';
+
+  $.get(dataUrl, function(data) {
+      // Calls the addChart function from the script chart.js
+      addChart(data, '#chart1');
+  });
+
+
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js"></script>
     <script src="{{ url_for('static', filename = 'javascript/chart.js') }}"></script>
+
+
 
 {% endblock %}
 
@@ -25,8 +34,32 @@
 {% block content %}
 <div class="container"> 
   <div class="page-header">
-    <h2>{{ vendor }} Usage</h2>
+    <h2>{{ vendor }} License Usage</h2>
     <h3>{{ moment(current_time).format('LLL' )}}</h3>
+    <div class="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+	Time Peroid
+	<span class="caret"></span>
+      </button>
+      <ul id="time-peroid" class="dropdown-menu" aria-labelledby="dropdownMenu1"> 
+	<li> <a href="{{ url_for('chart', vendor=vendor, time_peroid='4h') }}">
+	    Last 4 hours</a></li>
+	<li> <a href="{{ url_for('chart', vendor=vendor, time_peroid='8h') }}">
+	    Last 8 hours</a></li>
+	<li> <a href="{{ url_for('chart', vendor=vendor, time_peroid='24h') }}">
+	    Last 24 hours</a></li>
+	<li> <a href="{{ url_for('chart', vendor=vendor, time_peroid='1w') }}">
+	    Last week</a></li>
+	<li><a href="{{ url_for('chart', vendor=vendor, time_peroid='1m') }}">
+	    Last month</a></li>
+	<li> 
+	  <a href="{{ url_for('chart', vendor=vendor, time_peroid='5m') }}">
+	    Last 5 months</a></li>
+	<li> 
+	  <a href="{{ url_for('chart', vendor=vendor, time_peroid='1y') }}">
+	    Last year</a></li>
+      </ul>
+    </div>
   </div>
   <svg id='chart1' name='{{vendor}}' width=100% height=550></svg>
 </div>
