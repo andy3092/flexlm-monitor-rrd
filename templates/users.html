@@ -1,12 +1,11 @@
 {% extends "base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}Flexlm{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h1>{{ vendor }} current users </h1>
-    <h2>{{ moment(current_time).format('LLL' )}}</h2>
+    <h2>{{ vendor }} current users </h2>
+    <h3>{{ moment(current_time).format('LLL' )}}</h3>
     <table style="width:100%">
       <thead>
 	<tr>
