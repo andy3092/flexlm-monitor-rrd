@@ -6,17 +6,18 @@ the columns you want then plot the results as a d3 chart. You will need to set u
 the rrd file and collect the usage data from the flexlm server.
 
 Requirments
-lmutil
-python, rrdtool
-sqlite
-flask
+lmutil, python, rrdtool, sqlite
 
-See the requirments.txt for the nessary python packages.
+To install the nessary python packages
+```
+pip install -r requirements.txt
+```
 
-To run the application.
+To run the application
 ```
 python flexlm_app.py runserver
 ```
+
 point your browser at: http://localhost:5000/
 
 The application was orginally written to replace somthing that I had written in 
