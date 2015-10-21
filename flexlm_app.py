@@ -10,10 +10,9 @@ from wtforms import StringField, FileField, SubmitField, IntegerField
 from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
 from wtforms.validators import Required
 from flask.ext.sqlalchemy import SQLAlchemy
-import flexlm_parser
 import json
+import flexlm_parser
 import rrdfetch
-#from operator import eq
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -73,8 +72,8 @@ class baseForm(Form):
 
     def validate_columns(self, field):
         for column_name in field.data.split(','):
-            if column_name not in rrdfetch.header(str(self.rrd_file.data)):
-                raise ValueError (rrdfetch.header(str(self.rrd_file.data)))
+            if column_name not in rrdfetch.header(self.rrd_file.data):
+                raise ValueError (rrdfetch.header(self.rrd_file.data))
 
 class AddServerForm(baseForm):
     submit = SubmitField('Add Server')
@@ -117,7 +116,7 @@ def edit(vendor):
 
     if settings.rrd_file != '':
         initial_has_rrd_file = True
-        header = rrdfetch.header(str(settings.rrd_file))
+        header = rrdfetch.header(settings.rrd_file)
         columns = [row.columns for row in settings.columns]
     else:
         initial_has_rrd_file = False
@@ -196,7 +195,7 @@ def users(vendor):
         abort(404)
     server = str(settings.port) +'@'+ settings.server
     users = flexlm_parser.get_licenses(server, settings.software)
-    print users
+
     return render_template('users.html', vendor=vendor, users=users, 
                            current_time=datetime.utcnow())
     
@@ -223,7 +222,7 @@ def usage(vendor, time_peroid):
     columns = [row.columns for row in settings.columns]
     # rrdtool bindings does not like unicode convert to str
     try:
-        data = rrdfetch.package_data(str(settings.rrd_file), str(time_peroid), 
+        data = rrdfetch.package_data(settings.rrd_file, time_peroid, 
                                      columns)
     except:
         abort(500)
