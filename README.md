@@ -26,9 +26,7 @@ flask. Hence could most probably be structured a little bit better.
 ## Credits
 Glyphicons - for the use of the icons
 
-beaugunderson
-
-https://github.com/beaugunderson/flexlm-license-status 
+beaugunderson -  https://github.com/beaugunderson/flexlm-license-status 
 Used their regular expressions for parsing the lmutil output.
 
 
