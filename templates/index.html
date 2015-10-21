@@ -3,7 +3,14 @@
 
 {% block title %}Flexlm{% endblock %}
 
+{% block styles %}
+{{super()}}
+<link rel="stylesheet"
+      href="{{url_for('static', filename='css/footer.css')}}">
+{% endblock %}
+
 {% block page_content %}
+<div>
 <div class="page-header">
     <h2>Flexlm License Servers</h2>
     <table style="width:80%">
@@ -44,10 +51,18 @@
       </tbody>
     </table>
 </div>
+
+<div>
     <a href="{{url_for('config')}}"
        <button type="button" class="btn btn-md">
 	 <i class="glyphicon glyphicon-plus"></i>&nbsp;Add Server</a>
 </button>
+</div>
+
+<div class="footer navbar-fixed-bottom">
+  Icons <a id="iconref" href="http://glyphicons.com/">Glyphicons</a>
+</div>
+
 {% endblock %}
 
 

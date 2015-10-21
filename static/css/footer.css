@@ -1,0 +1,12 @@
+.navbar-fixed-bottom {
+    color: #6B6B6B;
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    margin: auto;
+    padding: 10px;
+}
+
+#iconref {
+    color: #6B6B6B;
+}
