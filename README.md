@@ -14,9 +14,9 @@ flask
 See the requirments.txt for the nessary python packages.
 
 To run the application.
-'''
+```
 python flexlm_app.py runserver
-'''
+```
 point your browser at: http://localhost:5000/
 
 The application was orginally written to replace somthing that I had written in 
