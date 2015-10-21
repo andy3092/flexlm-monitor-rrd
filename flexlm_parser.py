@@ -4,6 +4,7 @@ import re
 import subprocess
 import sys
 
+# May have to change this line to the path to lmutil
 lmutil = "/usr/local/bin/lmutil"
 
 def parse_license_line(line):
