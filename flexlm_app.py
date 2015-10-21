@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import os
 from datetime import datetime
 from flask import Flask, render_template, session, redirect, url_for, Response
