@@ -2,14 +2,8 @@
 
 {% block navbaritems %}
 {{ super() }}
-<li>
-  <a href="{{ url_for('chart', vendor=vendor) }}">
-	   <i class="glyphicon glyphicon-signal"></i>&nbsp; Usage Chart</a>
-</li>
-<li> 
-  <a href="{{ url_for('edit', vendor=vendor) }}"> 
-    <i class="glyphicon glyphicon-edit"></i>&nbsp; Edit Settings</a> 
-</li>
+{% include 'chart-navbar.html' %}
+{% include 'edit-navbar.html' %}
 {% endblock %}
 
 {% block page_content %}

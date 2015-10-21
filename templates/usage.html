@@ -24,22 +24,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js"></script>
     <script src="{{ url_for('static', filename = 'javascript/chart.js') }}"></script>
-
-
-
 {% endblock %}
 
-{% block title %}Flexlm {{ software }}{% endblock %}
-
 {% block navbaritems %}
-<li>
-  <a href="{{ url_for('users', vendor=vendor) }}">
-	   <i class="glyphicon glyphicon-user"></i>&nbsp; Current Users</a>
-</li>
-<li> 
-  <a href="{{ url_for('edit', vendor=vendor) }}"> 
-    <i class="glyphicon glyphicon-edit"></i>&nbsp; Edit Settings</a> 
-</li>
+{{ super() }}
+{% include 'users-navbar.html' %}
+{% include 'edit-navbar.html' %}
 {% endblock %}
 
 {% block content %}
