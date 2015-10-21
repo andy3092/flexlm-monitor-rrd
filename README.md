@@ -8,6 +8,14 @@ the rrd file and collect the usage data from the flexlm server.
 Requirments
 lmutil, python, rrdtool, sqlite
 
+In the file flexlm_parser.py check the following line and make sure that is 
+matches the location of the lmutil binary.
+
+```
+# May have to change this line to the path to lmutil
+lmutil = "/usr/local/bin/lmutil"
+```
+
 To install the nessary python packages
 ```
 pip install -r requirements.txt
