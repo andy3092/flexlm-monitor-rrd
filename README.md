@@ -24,9 +24,11 @@ the past that worked but was not that portable. It was also written to try out
 flask. Hence could most probably be structured a little bit better. 
 
 ## Credits
-Glyphicons - for icons
-https://github.com/beaugunderson/flexlm-license-status - used his regular 
-expressions for parsing the lmutil output.
+Glyphicons - for the use of the icons
+
+beaugunderson
+https://github.com/beaugunderson/flexlm-license-status 
+Used their regular expressions for parsing the lmutil output.
 
 
 
