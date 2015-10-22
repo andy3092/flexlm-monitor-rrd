@@ -41,17 +41,17 @@ http://localhost:5000/servers/usage/my_server/1y
 ```
 
 The corrosponding json end point is
-http://localhost:5000/servers/usage/data/<server name>/<time peroid>
+http://localhost:5000/servers/usage/data/my_server/1y
 
 The application was orginally written to replace somthing that I had written in 
 the past that worked but was not that portable. It was also developed to try 
 out flask. Hence could most probably be structured a little bit better. 
 
 ## Credits
-Glyphicons - for the use of the icons
+[Glyphicons]: (http://glyphicons.com/)
 
-beaugunderson -  https://github.com/beaugunderson/flexlm-license-status 
-Used their regular expressions for parsing the lmutil output.
+beaugunderson [flexlm-license-status script]: (https://github.com/beaugunderson/flexlm-license-status)
+Used the regular expressions from the script for parsing the lmutil output.
 
 
 
