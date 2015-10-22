@@ -8,6 +8,7 @@ the rrd file and collect the usage data from the flexlm server.
 Requirments
 lmutil, python, rrdtool, sqlite
 
+## Setup
 In the file flexlm_parser.py check the following line and make sure that is 
 matches the location of the lmutil binary.
 
@@ -19,6 +20,12 @@ lmutil = "/usr/local/bin/lmutil"
 To install the nessary python packages
 ```
 pip install -r requirements.txt
+```
+Also Change the SECRET_KEY value in the flex_app.py from hard to guess string to a string that would be difficult to guess.
+
+```
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'hard to guess string'
 ```
 
 To run the application
