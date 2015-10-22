@@ -48,9 +48,10 @@ the past that worked but was not that portable. It was also developed to try
 out flask. Hence could most probably be structured a little bit better. 
 
 ## Credits
-[Glyphicons]: (http://glyphicons.com/)
+[Glyphicons]: http://glyphicons.com/
 
-beaugunderson [flexlm-license-status script]: (https://github.com/beaugunderson/flexlm-license-status)
+beaugunderson 
+[flexlm-license-status script](https://github.com/beaugunderson/flexlm-license-status)
 Used the regular expressions from the script for parsing the lmutil output.
 
 
