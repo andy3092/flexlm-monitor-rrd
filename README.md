@@ -52,7 +52,6 @@ out flask. Hence could most probably be structured a little bit better.
 
 beaugunderson 
 [flexlm-license-status script](https://github.com/beaugunderson/flexlm-license-status)
-used the regular expressions from the script for parsing the lmutil output.
 
 
 
