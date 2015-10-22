@@ -21,14 +21,13 @@ To install the nessary python packages
 ```
 pip install -r requirements.txt
 ```
-Change the SECRET_KEY value in the flex_app.py from "hard to guess string" 
-to a string that would be difficult to guess.
-
 In flexlm_app.py:
 ```
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
 ```
+Change the SECRET_KEY value in the flex_app.py from "hard to guess string" 
+to a string that would be difficult to guess.
 
 To run the application
 ```
