@@ -26,7 +26,9 @@ def package_data(rrd_file, time_period, columns):
     columns - list of column names to package
     returns an array of dictionaries
     '''
-    # convert all inputs to str as sometimes passed unicode and rrd chocks
+    #---------------------------------------------------------------------    
+    # convert all inputs to str as sometimes passed unicode and rrd choaks
+    #---------------------------------------------------------------------
     rrd_file = str(rrd_file)
     time_period = str(time_period)
     columns = [str(col) for col in columns]
@@ -74,3 +76,4 @@ if __name__ == '__main__':
     DATABASE_NAME = '/tmp/test.rrd'
     print (header(DATABASE_NAME))
     print package_data(DATABASE_NAME, '5m', ['used','total'])
+
