@@ -6,11 +6,11 @@ function xticFormat(timePeroid) {
     else if (timeUnit === 'w') {
 	return '%a %_I:%M%p';
     }
-    else if (timePeroid === '1m') {
-	return '%b %_d';
-    }
     else if (timeUnit === 'm' || timeUnit === 'y') {
 	return '%b %_d';
+    }
+    else {
+	return '%x'
     }
 }
 
