@@ -12,10 +12,11 @@
 <!-- Add a chart to the current page -->
 <script type=text/javascript>
   var dataUrl = '{{ url_for('usage', vendor=vendor, time_peroid=time_peroid) }}';
-
+  var timePeroid = '{{time_peroid}}';
+  
   $.get(dataUrl, function(data) {
-      // Calls the addChart function from the script chart.js
-      addChart(data, '#chart1');
+  // Calls the addChart function from the script chart.js
+      addChart(data, '#chart1', xticFormat(timePeroid));
   });
 
 

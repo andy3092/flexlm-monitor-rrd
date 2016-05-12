@@ -1,4 +1,20 @@
-function addChart(data, svgid) {
+function xticFormat(timePeroid) {
+    timeUnit = timePeroid.slice(-1);
+    if (timeUnit === 'h' || timeUnit === 'd') {
+	return '%_I:%M%p';
+    }
+    else if (timeUnit === 'w') {
+	return '%a %_I:%M%p';
+    }
+    else if (timePeroid === '1m') {
+	return '%b %_d';
+    }
+    else if (timeUnit === 'm' || timeUnit === 'y') {
+	return '%b %_d';
+    }
+}
+
+function addChart(data, svgid, timeFormat) {
     var colors = d3.scale.category20();
     var chart;
 
@@ -10,7 +26,7 @@ function addChart(data, svgid) {
             .controlLabels({stacked: "Stacked"})
             .duration(300);
 
-        chart.xAxis.tickFormat(function(d) { return d3.time.format('%x')(new Date(d)) });
+        chart.xAxis.tickFormat(function(d) { return d3.time.format(timeFormat)(new Date(d)) });
         chart.yAxis.tickFormat(d3.format(',.4f'));
 
         chart.legend.vers('furious');
