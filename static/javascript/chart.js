@@ -1,9 +1,9 @@
 function xticFormat(timePeroid) {
     timeUnit = timePeroid.slice(-1);
-    if (timeUnit === 'h' || timeUnit === 'd') {
+    if (timeUnit === 'h') {
 	return '%_I:%M%p';
     }
-    else if (timeUnit === 'w') {
+    else if (timeUnit === 'd' || timeUnit === 'w') {
 	return '%a %_I:%M%p';
     }
     else if (timeUnit === 'm' || timeUnit === 'y') {
@@ -26,8 +26,14 @@ function addChart(data, svgid, timeFormat) {
             .controlLabels({stacked: "Stacked"})
             .duration(300);
 
-        chart.xAxis.tickFormat(function(d) { return d3.time.format(timeFormat)(new Date(d)) });
-        chart.yAxis.tickFormat(d3.format(',.4f'));
+        chart.xAxis
+	    .axisLabel("Time peroid")
+	    .tickFormat(function(d)
+			{ return d3.time.format(timeFormat)(new Date(d)) });
+        chart.yAxis
+	    .axisLabel("Number of licenses used")
+	    .tickFormat(d3.format(',g')
+		       );
 
         chart.legend.vers('furious');
 
