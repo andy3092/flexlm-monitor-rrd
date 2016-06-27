@@ -8,6 +8,7 @@ from flask.ext.script import Manager
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.wtf import Form
+from flask.ext.login import LoginManager, UserMixin, login_required
 from wtforms import StringField, FileField, SubmitField, IntegerField
 from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
 from wtforms.validators import Required
@@ -25,13 +26,20 @@ app.config['SECRET_KEY'] = 'hard to guess string'
 app.config['SQLALCHEMY_DATABASE_URI'] =\
     'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
-#app.debug = True
+app.debug = True
 
 manager = Manager(app)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 moment = Moment(app)
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = 'auth.login'
+login_manager.init_app(app)
 
+#-------------------------------------------------------------------
+# Database Models for SQLAlchemy
+#-------------------------------------------------------------------
 class Server(db.Model):
     __tablename__ = 'servers'
     id = db.Column(db.Integer, primary_key=True)
@@ -66,7 +74,15 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
-class User(db.Model):
+#-------------------------------------------------------------------
+# Authentication implentation and SQLAlchemy model
+#-------------------------------------------------------------------
+# The following dictionary acts as a dummy database for the moment
+# get it up and running first then implment the proper hashing
+
+users = {'admin': {'pw': 'admin'}}
+
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, index=True)
@@ -86,7 +102,35 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
-    
+
+@login_manager.user_loader
+def user_loader(user_name):
+    if user_name not in users:
+        return
+
+    user = User()
+    user.id = user_name
+    return user
+
+@login_manager.request_loader
+def request_loader(request):
+    user_name = request.form.get('user_name')
+    if user_name not in users:
+        return
+
+    user = User()
+    user.id = user_name
+
+    # DO NOT ever store passwords in plaintext and always compare password
+    # hashes using constant-time comparison!
+    user.is_authenticated = request.form['pw'] == users[user_name]['pw']
+
+    return user
+
+#-------------------------------------------------------------------
+# Forms
+#-------------------------------------------------------------------
+
 class baseForm(Form):
     vendor = StringField('Vendor', validators=[Required()])
     port = IntegerField('Port Number', validators=[Required()])
@@ -115,12 +159,17 @@ class baseForm(Form):
 class AddServerForm(baseForm):
     submit = SubmitField('Add Server')
 
+#-------------------------------------------------------------------
+# Routes
+#-------------------------------------------------------------------
+
 @app.route('/')
 def index():
     servers = Server.query.all()
     return render_template('index.html', servers=servers)
 
 @app.route('/servers/config', methods=['GET', 'POST'])
+@login_required
 def config():
     form = AddServerForm()
     if form.validate_on_submit():
@@ -277,6 +326,10 @@ def chart(vendor, time_peroid='24h'):
     return render_template('usage.html', vendor=vendor, 
                            current_time=datetime.utcnow(), 
                            time_peroid=time_peroid)
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return render_template('401.html'), 401
 
 @app.errorhandler(404)
 def page_not_found(e):
