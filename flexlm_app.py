@@ -80,7 +80,7 @@ class Role(db.Model):
 # The following dictionary acts as a dummy database for the moment
 # get it up and running first then implment the proper hashing
 
-users = {'admin': {'pw': 'admin'}}
+users_tmp = {'admin': {'pw': 'admin'}}
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -105,7 +105,7 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def user_loader(user_name):
-    if user_name not in users:
+    if user_name not in users_tmp:
         return
 
     user = User()
@@ -115,7 +115,7 @@ def user_loader(user_name):
 @login_manager.request_loader
 def request_loader(request):
     user_name = request.form.get('user_name')
-    if user_name not in users:
+    if user_name not in users_tmp:
         return
 
     user = User()
@@ -123,7 +123,7 @@ def request_loader(request):
 
     # DO NOT ever store passwords in plaintext and always compare password
     # hashes using constant-time comparison!
-    user.is_authenticated = request.form['pw'] == users[user_name]['pw']
+    user.is_authenticated = request.form['pw'] == users_tmp[user_name]['pw']
 
     return user
 
@@ -159,12 +159,24 @@ class baseForm(Form):
 class AddServerForm(baseForm):
     submit = SubmitField('Add Server')
 
+class LoginForm(Form):
+    user_name = StringField('User Name', validators=[Required()])
+
+class ChangePasswordForm():
+    pass
+
 #-------------------------------------------------------------------
 # Routes
 #-------------------------------------------------------------------
 
 @app.route('/')
 def index():
+    servers = Server.query.all()
+    return render_template('index.html', servers=servers)
+
+@app.route('/login')
+def login():
+    form = LoginForm()
     servers = Server.query.all()
     return render_template('index.html', servers=servers)
 
@@ -195,6 +207,7 @@ def config():
     return render_template('config.html', form=form)
 
 @app.route('/servers/config/<vendor>', methods=['GET', 'POST'])
+@login_required
 def edit(vendor):
     settings = Server.query.filter_by(vendor=vendor).first()
     if settings is None:
@@ -289,13 +302,14 @@ def users(vendor):
     return render_template('users.html', vendor=vendor)
 
 @app.route('/servers/delete/<vendor>')
+@login_required
 def delete(vendor):
     settings = Server.query.filter_by(vendor=vendor).first()
     if settings is None:
         abort(404)
     else:
         Server.query.filter_by(vendor=settings.vendor).delete()
-        # Delete cColumns so they are not orphaned
+        # Delete Columns so they are not orphaned
         Columns.query.filter_by(server_id=settings.id).delete()
         db.session.commit()
     return redirect(url_for('index'))
