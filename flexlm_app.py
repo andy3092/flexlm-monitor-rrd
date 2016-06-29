@@ -9,7 +9,7 @@ from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.wtf import Form
 from flask.ext.login import LoginManager, UserMixin, login_required
-from wtforms import StringField, FileField, SubmitField, IntegerField
+from wtforms import StringField, FileField, SubmitField, IntegerField, PasswordField
 from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
 from wtforms.validators import Required
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -161,7 +161,9 @@ class AddServerForm(baseForm):
 
 class LoginForm(Form):
     user_name = StringField('User Name', validators=[Required()])
-
+    password = PasswordField('Password', validators=[Required()])
+    submit = SubmitField('Log in')
+    
 class ChangePasswordForm():
     pass
 
@@ -174,11 +176,10 @@ def index():
     servers = Server.query.all()
     return render_template('index.html', servers=servers)
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    servers = Server.query.all()
-    return render_template('index.html', servers=servers)
+    return render_template('login.html', form=form)
 
 @app.route('/servers/config', methods=['GET', 'POST'])
 @login_required
