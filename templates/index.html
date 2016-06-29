@@ -37,7 +37,9 @@
 	   <i class="glyphicon glyphicon-user"></i>&nbsp;Current Users</a>
 	</td>
 	<td> <a href="{{ url_for('chart', vendor=server.vendor) }}"> 
-	    <i class="glyphicon glyphicon-signal"></i>&nbsp;Usage Chart</a></td>
+	    <i class="glyphicon glyphicon-signal"></i>&nbsp;Usage Chart</a>
+	</td>
+	{% if current_user.is_authenticated %}
 	<td> 
 	  <a href="{{ url_for('edit', vendor=server.vendor) }}"> 
 	    <i class="glyphicon glyphicon-edit"></i>&nbsp;Edit</a> 
@@ -46,18 +48,21 @@
 	  <a href="{{ url_for('delete', vendor=server.vendor) }}"> 
 	    <i class="glyphicon glyphicon-remove"></i>&nbsp;Remove</a> 
 	</td>
+	{% endif %}
 	{% endfor %}
 	</tr>
       </tbody>
     </table>
 </div>
 
+{% if current_user.is_authenticated %}
 <div>
     <a href="{{url_for('config')}}"
        <button type="button" class="btn btn-md">
 	 <i class="glyphicon glyphicon-plus"></i>&nbsp;Add Server</a>
 </button>
 </div>
+{% endif %}
 
 <div class="footer navbar-fixed-bottom">
   Icons <a id="iconref" href="http://glyphicons.com/">Glyphicons</a>
