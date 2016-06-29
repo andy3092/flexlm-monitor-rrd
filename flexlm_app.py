@@ -8,7 +8,8 @@ from flask.ext.script import Manager
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.wtf import Form
-from flask.ext.login import LoginManager, UserMixin, login_required, current_user, login_user
+from flask.ext.login import LoginManager, UserMixin
+from flask.ext.login import login_required, current_user, login_user, logout_user
 from wtforms import StringField, FileField, SubmitField, IntegerField, PasswordField
 from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
 from wtforms.validators import Required
@@ -188,6 +189,13 @@ def login():
             return redirect(url_for('index'))
     flash('Invalid username or password.') 
     return render_template('login.html', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.')
+    return redirect(url_for('index'))
 
 @app.route('/servers/config', methods=['GET', 'POST'])
 @login_required
