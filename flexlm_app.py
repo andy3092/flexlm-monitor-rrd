@@ -2,13 +2,13 @@
 
 import os
 from datetime import datetime
-from flask import Flask, render_template, session, redirect, url_for, Response
+from flask import Flask, render_template, session, redirect, url_for, Response, flash
 from flask import abort
 from flask.ext.script import Manager
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.wtf import Form
-from flask.ext.login import LoginManager, UserMixin, login_required
+from flask.ext.login import LoginManager, UserMixin, login_required, current_user, login_user
 from wtforms import StringField, FileField, SubmitField, IntegerField, PasswordField
 from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
 from wtforms.validators import Required
@@ -179,6 +179,14 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    if form.validate_on_submit():
+        user_name = form.user_name.data
+        if users_tmp.has_key(user_name) and form.password.data == users_tmp[user_name]['pw']:
+            user = User()
+            user.id = user_name
+            login_user(user)
+            return redirect(url_for('index'))
+    flash('Invalid username or password.') 
     return render_template('login.html', form=form)
 
 @app.route('/servers/config', methods=['GET', 'POST'])
