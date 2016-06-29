@@ -29,7 +29,14 @@
 		{% block navbaritems %}
 		{% endblock %}
             </ul>
-        </div>
+	    <ul class="nav navbar-nav navbar-right">
+	      {% if current_user.is_authenticated %}
+	      <li><a href="{{url_for('login')}}">Log out</a></li>
+	      {% else %}
+              <li><a href="{{url_for('login')}}">Log in</a></li>
+	      {% endif %}
+            </ul>
+        </div> <!-- ./navbar-collapse -->
     </div>
 </div>
 {% endblock %}
