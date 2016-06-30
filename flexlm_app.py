@@ -19,6 +19,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import flexlm_parser
 import rrdfetch
+import pdb
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -35,7 +36,7 @@ db = SQLAlchemy(app)
 moment = Moment(app)
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
-login_manager.login_view = 'auth.login'
+login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 #-------------------------------------------------------------------
@@ -81,8 +82,6 @@ class Role(db.Model):
 # The following dictionary acts as a dummy database for the moment
 # get it up and running first then implment the proper hashing
 
-users_tmp = {'admin': {'pw': 'admin'}}
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -105,28 +104,8 @@ class User(UserMixin, db.Model):
         return '<User %r>' % self.username
 
 @login_manager.user_loader
-def user_loader(user_name):
-    if user_name not in users_tmp:
-        return
-
-    user = User()
-    user.id = user_name
-    return user
-
-@login_manager.request_loader
-def request_loader(request):
-    user_name = request.form.get('user_name')
-    if user_name not in users_tmp:
-        return
-
-    user = User()
-    user.id = user_name
-
-    # DO NOT ever store passwords in plain text and always compare password
-    # hashes using constant-time comparison!
-    user.is_authenticated = request.form['pw'] == users_tmp[user_name]['pw']
-
-    return user
+def user_loader(user_id):
+        return User.query.get(int(user_id))
 
 #-------------------------------------------------------------------
 # Forms
@@ -174,6 +153,7 @@ class ChangePasswordForm():
 
 @app.route('/')
 def index():
+    #pdb.set_trace()
     servers = Server.query.all()
     return render_template('index.html', servers=servers)
 
@@ -181,11 +161,10 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user_name = form.user_name.data
-        if users_tmp.has_key(user_name) and form.password.data == users_tmp[user_name]['pw']:
-            user = User()
-            user.id = user_name
+        user = User.query.filter_by(username=form.user_name.data).first()
+        if user is not None and user.verify_password(form.password.data):
             login_user(user)
+            #pdb.set_trace()
             return redirect(url_for('index'))
     flash('Invalid username or password.') 
     return render_template('login.html', form=form)
