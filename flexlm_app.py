@@ -122,7 +122,7 @@ def request_loader(request):
     user = User()
     user.id = user_name
 
-    # DO NOT ever store passwords in plaintext and always compare password
+    # DO NOT ever store passwords in plain text and always compare password
     # hashes using constant-time comparison!
     user.is_authenticated = request.form['pw'] == users_tmp[user_name]['pw']
 
