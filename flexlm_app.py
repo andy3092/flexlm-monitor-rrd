@@ -19,7 +19,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import flexlm_parser
 import rrdfetch
-import pdb
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -140,7 +139,6 @@ class ChangePasswordForm():
 
 @app.route('/')
 def index():
-    #pdb.set_trace()
     servers = Server.query.all()
     return render_template('index.html', servers=servers)
 
@@ -151,7 +149,6 @@ def login():
         user = User.query.filter_by(username=form.user_name.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user)
-            #pdb.set_trace()
             return redirect(url_for('index'))
     flash('Invalid username or password.') 
     return render_template('login.html', form=form)
@@ -180,7 +177,6 @@ def config():
                         rrd_file=session.get('rrd_file'))
         # Commit to the database
         db.session.add(record)
-        #db.session.add(column_record)
         db.session.commit()
         if session.get('rrd_file') is not None:
             return redirect(url_for('edit',

@@ -17,6 +17,18 @@ matches the location of the lmutil binary.
 lmutil = "/usr/local/bin/lmutil"
 ```
 
+Run the add_user script this will prompt you for a user name and a password.
+
+```
+python add_user.py
+```
+
+This will add a new user to the web application.
+By logging onto the webapplication you will be able to add and confiure
+flexlm servers and select an rrd files through the web application.
+No logon is required to view the current users or usage graphs.
+
+
 To install the nessary python packages
 ```
 pip install -r requirements.txt
@@ -57,6 +69,8 @@ out flask. Hence could most probably be structured a little bit better.
 
 ## Credits
 [Glyphicons](http://glyphicons.com)
+
+Miguel Grinberg book [Flask web development](http://shop.oreilly.com/product/0636920031116.do)
 
 beaugunderson 
 [flexlm-license-status script](https://github.com/beaugunderson/flexlm-license-status)
