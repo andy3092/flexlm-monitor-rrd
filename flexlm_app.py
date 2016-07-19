@@ -10,9 +10,11 @@ from flask.ext.moment import Moment
 from flask.ext.wtf import Form
 from flask.ext.login import LoginManager, UserMixin
 from flask.ext.login import login_required, current_user, login_user, logout_user
-from wtforms import StringField, FileField, SubmitField, IntegerField, PasswordField
-from wtforms import ValidationError, widgets, SelectMultipleField, BooleanField
-from wtforms.validators import Required
+from wtforms import StringField, FileField, SubmitField, IntegerField
+from wtforms import PasswordField, BooleanField, widgets, SelectMultipleField
+from wtforms import ValidationError
+from wtforms.validators import Required, EqualTo
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -64,7 +66,7 @@ class Columns(db.Model):
         return '<Columns %r>' % self.columns
 
 #-------------------------------------------------------------------
-# Authentication implentation and SQLAlchemy model
+# Authentication implentation and SQLAlchemy model for a user
 # This database model has been taken from the book flask web development by
 # Miguel Grinberg
 #-------------------------------------------------------------------
@@ -130,8 +132,11 @@ class LoginForm(Form):
     password = PasswordField('Password', validators=[Required()])
     submit = SubmitField('Log in')
     
-class ChangePasswordForm():
-    pass
+class ChangePasswordForm(Form):
+    password = PasswordField('Password', validators=[
+        Required(), EqualTo('password2', message='Passwords must match.')])
+    password2 = PasswordField('Password', validators=[Required()])
+    submit = SubmitField('Change Password')
 
 #-------------------------------------------------------------------
 # Routes
@@ -151,7 +156,21 @@ def login():
             login_user(user)
             return redirect(url_for('index'))
     flash('Invalid username or password.') 
-    return render_template('login.html', form=form)
+    return render_template('login-password.html', form=form,
+                           heading="Login")
+
+@app.route('/password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    #user_record = User.query.filter_by(current_user.username
+    if form.validate_on_submit():
+        current_user.password = form.password.data
+        flash('Password Changed')
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('login-password.html', form=form,
+                           heading="Change Password")
 
 @app.route('/logout')
 @login_required
